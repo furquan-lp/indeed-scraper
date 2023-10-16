@@ -18,8 +18,9 @@ def get_location_ip(ipaddr):
             }
 
 
-def get_indeed_search_url(keyword, location, offset=0):
-    parameters = {'q': keyword, 'l': location, 'filter': 0, 'start': offset}
+def get_indeed_search_url(keyword, location, radius, offset=0):
+    parameters = {'q': keyword, 'l': location,
+                  'filter': 0, 'start': offset, 'radius': radius}
     return 'https://in.indeed.com/jobs?' + urlencode(parameters)
 
 
@@ -28,6 +29,6 @@ headers = {
 
 job_ids = []
 keyword = 'python'
-location = get_location_ip(get_current_ip())
+location = {'city': 'Patna', 'state': 'Bihar'}
 print(get_indeed_search_url(
-    keyword, f"{location.get('city')}, {location.get('state')}"))
+    keyword, f"{location.get('city')}, {location.get('state')}", 100))

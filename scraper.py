@@ -2,6 +2,7 @@ import requests as req
 import re
 import json
 from urllib.parse import urlencode
+import os
 
 
 def get_current_ip():
@@ -24,6 +25,7 @@ def get_indeed_search_url(keyword, location, radius, offset=0):
     return 'https://in.indeed.com/jobs?' + urlencode(parameters)
 
 
+live_cookie = os.getenv('INDEED_SCRAPER_COOKIE')
 job_ids = []
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
@@ -37,19 +39,21 @@ headers = {
     'Sec-Fetch-Site': 'none',
     'Sec-Fetch-User': '?1',
     'Sec-GPC': '1',
-    'TE': 'trailers'
+    'TE': 'trailers',
+    'Cookie': live_cookie
 }
 keyword = 'python'
 location = {'city': 'Patna', 'state': 'Bihar'}
 print('Using', get_indeed_search_url(
     keyword, f"{location.get('city')}, {location.get('state')}", 100))
-
+print('Using headers', headers)
+"""
 for offset in range(0, 1010, 10):
     try:
         indeed_jobs_url = get_indeed_search_url(
             keyword, f"{location.get('city')}, {location.get('state')}", 100, offset)
         res = req.get(indeed_jobs_url, headers=headers)
-
+        print('response was', res)
         if res.status_code == 200:
             script_tag = re.findall(
                 r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});', res.text)
@@ -67,3 +71,4 @@ for offset in range(0, 1010, 10):
         print('An error occurred while fetching job IDs:', e)
 
 print(job_ids)
+"""

@@ -19,9 +19,15 @@ def get_location_ip(ipaddr):
 
 
 def get_indeed_search_url(keyword, location, offset=0):
-    parameters = {"q": keyword, "l": location, "filter": 0, "start": offset}
-    return "https://www.indeed.com/jobs?" + urlencode(parameters)
+    parameters = {'q': keyword, 'l': location, 'filter': 0, 'start': offset}
+    return 'https://www.indeed.com/jobs?' + urlencode(parameters)
 
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/118.0"}
+    'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/118.0'}
+
+job_ids = []
+keyword = 'python'
+location = get_location_ip(get_current_ip())
+print(get_indeed_search_url(
+    keyword, f"{location.get('city')}, {location.get('state')}"))

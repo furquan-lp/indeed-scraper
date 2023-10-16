@@ -26,7 +26,19 @@ def get_indeed_search_url(keyword, location, radius, offset=0):
 
 job_ids = []
 headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:109.0) Gecko/20100101 Firefox/118.0'}
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-GB,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Sec-GPC': '1',
+    'TE': 'trailers'
+}
 keyword = 'python'
 location = {'city': 'Patna', 'state': 'Bihar'}
 print('Using', get_indeed_search_url(

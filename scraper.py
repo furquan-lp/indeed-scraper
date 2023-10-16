@@ -25,7 +25,7 @@ def get_indeed_search_url(keyword, location, radius, offset=0):
     return 'https://in.indeed.com/jobs?' + urlencode(parameters)
 
 
-live_cookie = os.getenv('INDEED_SCRAPER_COOKIE')
+live_cookie = os.environ['INDEED_SCRAPER_COOKIE']
 jobs = []
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',

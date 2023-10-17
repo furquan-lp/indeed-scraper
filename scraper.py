@@ -3,6 +3,7 @@ import re
 import json
 from urllib.parse import urlencode
 import os
+from pymongo import MongoClient
 
 
 def get_current_ip():
@@ -86,3 +87,8 @@ try:
 
 except Exception as e:
     print('An error occurred while fetching job IDs:', e)
+
+mongodb_uri = os.environ['INDEED_SCRAPER_MONGO_URI']
+client = MongoClient(mongodb_uri,
+                     tls=True,
+                     tlsCertificateKeyFile=os.environ['INDEED_SCRAPER_MONGO_PEM'],)

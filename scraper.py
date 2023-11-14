@@ -4,6 +4,7 @@ import json
 from urllib.parse import urlencode
 import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
 
 def get_current_ip():
@@ -26,24 +27,25 @@ def get_indeed_search_url(keyword, location, radius, offset=0):
     return 'https://in.indeed.com/jobs?' + urlencode(parameters)
 
 
+load_dotenv()
 live_cookie = os.environ['INDEED_SCRAPER_COOKIE']
 jobs = []
 headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-GB,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate, br',
     'DNT': '1',
+    'Referer': 'https://in.indeed.com/',
     'Connection': 'keep-alive',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-Site': 'same-origin',
     'Sec-Fetch-User': '?1',
     'Sec-GPC': '1',
-    'TE': 'trailers',
     'Cookie': live_cookie
 }
-keyword = 'python'
+keyword = 'java'
 location = {'city': 'Patna', 'state': 'Bihar'}
 print('Using', get_indeed_search_url(
     keyword, f"{location.get('city')}, {location.get('state')}", 100))
@@ -88,7 +90,9 @@ try:
 except Exception as e:
     print('An error occurred while fetching job IDs:', e)
 
-mongodb_uri = os.environ['INDEED_SCRAPER_MONGO_URI']
-client = MongoClient(mongodb_uri,
-                     tls=True,
-                     tlsCertificateKeyFile=os.environ['INDEED_SCRAPER_MONGO_PEM'],)
+'''
+collection_name = db['portfolios']
+item_details = collection_name.find()
+for item in item_details:
+    print(item)
+'''

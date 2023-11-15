@@ -2,9 +2,23 @@ import requests as req
 import re
 import json
 from urllib.parse import urlencode
-import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
+from typing import Final
+
+default_headers: Final = {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-GB,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate',
+    'DNT': '1',
+    'Referer': 'https://in.indeed.com/',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+    'Sec-Fetch-User': '?1',
+    'Sec-GPC': '1'
+}
 
 
 def get_current_ip():
@@ -27,27 +41,9 @@ def get_indeed_search_url(keyword, location, radius, offset=0):
     return 'https://in.indeed.com/jobs?' + urlencode(parameters)
 
 
-load_dotenv()
-live_cookie = os.environ['INDEED_SCRAPER_COOKIE']
-headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-GB,en;q=0.5',
-    'Accept-Encoding': 'gzip, deflate',
-    'DNT': '1',
-    'Referer': 'https://in.indeed.com/',
-    'Connection': 'keep-alive',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'same-origin',
-    'Sec-Fetch-User': '?1',
-    'Sec-GPC': '1'
-}
-
-
-def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie):
+def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie: str):
     jobs = []
-    headers['Cookie'] = header_cookie
+    headers = {**default_headers, 'Cookie': header_cookie}
     print('Using', get_indeed_search_url(search_term,
           f"{location.get('city')}, {location.get('state')}", 100))
     print('Using headers', headers)
@@ -90,20 +86,3 @@ def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie):
     except Exception as e:
         print('An error occurred while fetching job IDs:', e)
     return jobs
-
-
-loc = {'city': 'Kolkata', 'state': 'West Bengal'}
-
-
-js = scrape_indeed_jobs('java', loc, live_cookie)
-
-print('fetched jobs:')
-for j in js:
-    print(j)
-
-'''
-collection_name = db['portfolios']
-item_details = collection_name.find()
-for item in item_details:
-    print(item)
-'''

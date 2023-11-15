@@ -82,7 +82,9 @@ def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie: str
                     print('err')
         else:
             print('Error: got response %d' % res.status_code)
+            return res.status_code
 
     except Exception as e:
         print('An error occurred while fetching job IDs:', e)
+        return 500
     return jobs

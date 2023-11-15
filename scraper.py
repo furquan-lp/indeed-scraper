@@ -41,13 +41,16 @@ headers = {
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'same-origin',
     'Sec-Fetch-User': '?1',
-    'Sec-GPC': '1',
-    'Cookie': live_cookie
+    'Sec-GPC': '1'
 }
 
 
-def scrape_indeed_jobs(search_term, location: set[str]):
+def scrape_indeed_jobs(search_term, location: set[str], header_cookie):
     jobs = []
+    headers['Cookie'] = header_cookie
+    print('Using', get_indeed_search_url(search_term,
+          f"{location.get('city')}, {location.get('state')}", 100))
+    print('Using headers', headers)
     try:
         indeed_jobs_url = get_indeed_search_url(
             search_term, f"{location.get('city')}, {location.get('state')}", 100)
@@ -90,11 +93,9 @@ def scrape_indeed_jobs(search_term, location: set[str]):
 
 
 loc = {'city': 'Kolkata', 'state': 'West Bengal'}
-print('Using', get_indeed_search_url(
-    'java', f"{loc.get('city')}, {loc.get('state')}", 100))
-print('Using headers', headers)
 
-js = scrape_indeed_jobs('java', loc)
+
+js = scrape_indeed_jobs('java', loc, live_cookie)
 
 print('fetched jobs:')
 for j in js:

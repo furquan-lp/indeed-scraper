@@ -45,7 +45,7 @@ headers = {
 }
 
 
-def scrape_indeed_jobs(search_term, location: set[str], header_cookie):
+def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie):
     jobs = []
     headers['Cookie'] = header_cookie
     print('Using', get_indeed_search_url(search_term,

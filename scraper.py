@@ -44,18 +44,13 @@ headers = {
     'Sec-GPC': '1',
     'Cookie': live_cookie
 }
-keyword = 'java'
-location = {'city': 'Kolkata', 'state': 'West Bengal'}
-print('Using', get_indeed_search_url(
-    keyword, f"{location.get('city')}, {location.get('state')}", 100))
-print('Using headers', headers)
 
 
 def scrape_indeed_jobs(search_term, location: set[str]):
     jobs = []
     try:
         indeed_jobs_url = get_indeed_search_url(
-            keyword, f"{location.get('city')}, {location.get('state')}", 100)
+            search_term, f"{location.get('city')}, {location.get('state')}", 100)
         res = req.get(indeed_jobs_url, headers=headers)
         print('response was', res)
         if res.status_code == 200:
@@ -68,7 +63,7 @@ def scrape_indeed_jobs(search_term, location: set[str]):
                     if job.get('jobkey') is not None:
                         jobs.append({
                             'id': job.get('jobkey'),
-                            'keyword': keyword,
+                            'keyword': search_term,
                             'location': location,
                             # 'page': round(offset / 10) + 1 if offset > 0 else 1,
                             'position': index,
@@ -94,8 +89,15 @@ def scrape_indeed_jobs(search_term, location: set[str]):
     return jobs
 
 
+loc = {'city': 'Kolkata', 'state': 'West Bengal'}
+print('Using', get_indeed_search_url(
+    'java', f"{loc.get('city')}, {loc.get('state')}", 100))
+print('Using headers', headers)
+
+js = scrape_indeed_jobs('java', loc)
+
 print('fetched jobs:')
-for j in scrape_job_urls(keyword, location):
+for j in js:
     print(j)
 
 '''

@@ -19,6 +19,7 @@ default_headers: Final = {
     'Sec-Fetch-User': '?1',
     'Sec-GPC': '1'
 }
+indeed_base_url: Final[str] = 'https://in.indeed.com/jobs?'
 
 
 def get_current_ip():
@@ -35,10 +36,10 @@ def get_location_ip(ipaddr):
             }
 
 
-def get_indeed_search_url(keyword, location, radius, offset=0):
+def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
     parameters = {'q': keyword, 'l': location,
                   'filter': 0, 'start': offset, 'radius': radius}
-    return 'https://in.indeed.com/jobs?' + urlencode(parameters)
+    return indeed_base_url + urlencode(parameters)
 
 
 def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie: str):

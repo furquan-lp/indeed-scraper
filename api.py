@@ -16,7 +16,7 @@ async def root():
 
 
 @app.get('/jobs/{keyword}')
-async def find_jobs(keyword: str, location: dict[str, str], scraper_header: ScraperHeader):
+async def find_jobs(keyword: str, scraper_header: ScraperHeader, location: dict[str, str] | None = None):
     scraper_result: list | int = scrape_indeed_jobs(
         keyword, location, scraper_header.indeed_header_cookie)
     print(scraper_result)

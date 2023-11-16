@@ -25,4 +25,4 @@ async def find_jobs(keyword: str, location: dict[str, str], scraper_header: Scra
     elif not scraper_result:
         raise HTTPException(status_code=404, detail="Jobs not found")
     else:
-        return {'keyword': keyword, 'loc': location}
+        return {'jobs': scraper_result}

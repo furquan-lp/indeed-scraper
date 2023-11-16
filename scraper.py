@@ -42,15 +42,16 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str, header_cookie: str):
     jobs = []
     headers = {**DEFAULT_HEADERS, 'Cookie': header_cookie}
+    search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
+        location) is dict else str(location)
     print('Using', get_indeed_search_url(search_term,
-          f"{location.get('city')}, {location.get('state')}", 100))
-    print('Using headers', headers)
+          search_location, 100), '\nHeaders', headers)
     try:
         indeed_jobs_url = get_indeed_search_url(
-            search_term, f"{location.get('city')}, {location.get('state')}", 100)
+            search_term, search_location, 100)
         res = req.get(indeed_jobs_url, headers=headers)
         print('response was', res)
         if res.status_code == 200:

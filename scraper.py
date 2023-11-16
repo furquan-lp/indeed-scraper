@@ -37,12 +37,12 @@ def get_location_ip(ipaddr):
 
 
 def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
-    parameters = {'q': keyword, 'l': location,
+    parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str, header_cookie: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, header_cookie: str):
     jobs = []
     headers = {**DEFAULT_HEADERS, 'Cookie': header_cookie}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(

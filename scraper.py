@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
 
-default_headers: Final = {
+DEFAULT_HEADERS: Final = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-GB,en;q=0.5',
@@ -19,6 +19,7 @@ default_headers: Final = {
     'Sec-Fetch-User': '?1',
     'Sec-GPC': '1'
 }
+INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
 
 
 def get_current_ip():
@@ -35,21 +36,22 @@ def get_location_ip(ipaddr):
             }
 
 
-def get_indeed_search_url(keyword, location, radius, offset=0):
-    parameters = {'q': keyword, 'l': location,
+def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
+    parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}
-    return 'https://in.indeed.com/jobs?' + urlencode(parameters)
+    return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str], header_cookie: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, header_cookie: str):
     jobs = []
-    headers = {**default_headers, 'Cookie': header_cookie}
+    headers = {**DEFAULT_HEADERS, 'Cookie': header_cookie}
+    search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
+        location) is dict else str(location)
     print('Using', get_indeed_search_url(search_term,
-          f"{location.get('city')}, {location.get('state')}", 100))
-    print('Using headers', headers)
+          search_location, 100), '\nHeaders', headers)
     try:
         indeed_jobs_url = get_indeed_search_url(
-            search_term, f"{location.get('city')}, {location.get('state')}", 100)
+            search_term, search_location, 100)
         res = req.get(indeed_jobs_url, headers=headers)
         print('response was', res)
         if res.status_code == 200:

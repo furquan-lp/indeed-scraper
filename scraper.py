@@ -6,18 +6,19 @@ from pymongo import MongoClient
 from typing import Final
 
 DEFAULT_HEADERS: Final = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-GB,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
     'DNT': '1',
-    'Referer': 'https://in.indeed.com/',
+    'Referer': 'https://in.indeed.com/?from=jobsearch-empty-whatwhere',
     'Connection': 'keep-alive',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'same-origin',
     'Sec-Fetch-User': '?1',
-    'Sec-GPC': '1'
+    'Sec-GPC': '1',
+    'TE': 'trailers'
 }
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
 

@@ -5,8 +5,8 @@ from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
 
+DEFAULT_USER_AGENT: Final[str] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 DEFAULT_HEADERS: Final = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-GB,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
@@ -43,9 +43,10 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, header_cookie: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **extra_headers: str):
     jobs = []
-    headers = {**DEFAULT_HEADERS, 'Cookie': header_cookie}
+    headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
+               **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
     print('Using', get_indeed_search_url(search_term,

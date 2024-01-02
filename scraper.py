@@ -23,20 +23,6 @@ DEFAULT_HEADERS: Final = {
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
 
 
-def get_current_ip():
-    res = req.get('https://api.ipify.org?format=json').json()
-    return res["ip"]
-
-
-def get_location_ip(ipaddr):
-    res = req.get(f'https://ipinfo.io/{ipaddr}/json').json()
-    return {'ip': ipaddr,
-            'city': res.get('city'),
-            'state': res.get('region'),
-            'country': res.get('country')
-            }
-
-
 def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
     parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}

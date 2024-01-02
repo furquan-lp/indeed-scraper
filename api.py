@@ -1,3 +1,4 @@
+import requests as req
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from scraper import scrape_indeed_jobs
@@ -9,6 +10,20 @@ class ScraperHeader(BaseModel):
 
 
 app = FastAPI()
+
+
+def get_server_ip():
+    res = req.get('https://api.ipify.org?format=json').json()
+    return res["ip"]
+
+
+def get_location_ip(ipaddr: str):
+    res = req.get(f'https://ipinfo.io/{ipaddr}/json').json()
+    return {'ip': ipaddr,
+            'city': res.get('city'),
+            'state': res.get('region'),
+            'country': res.get('country')
+            }
 
 
 @app.get('/')

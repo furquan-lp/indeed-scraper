@@ -24,6 +24,8 @@ DEFAULT_HEADERS: Final = {
 }
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
 global_logger = logging.getLogger(__name__)
+formatter = logging.Formatter(
+    '%(asctime)s  %(levelname)s: %(message)s')
 
 
 def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
@@ -32,24 +34,28 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool | None = None,
-                       logfilename: str = 'scraper.log', **extra_headers: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool = False,
+                       logfilename: str = f'{__name__}.log', **extra_headers: str):
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
 
+    logfile_handler = logging.FileHandler(logfilename)
+    logfile_handler.setFormatter(formatter)
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setFormatter(formatter)
     if log:
         global_logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            '%(asctime)s  %(levelname)s: %(message)s')
-        logfile_handler = logging.FileHandler(logfilename)
-        logfile_handler.setFormatter(formatter)
-        stdout_handler = logging.StreamHandler()
-        stdout_handler.setFormatter(formatter)
-        global_logger.addHandler(logfile_handler)
-        global_logger.addHandler(stdout_handler)
+        if not global_logger.handlers:
+            global_logger.addHandler(logfile_handler)
+            global_logger.addHandler(stdout_handler)
+    else:
+        global_logger.setLevel(logging.ERROR)
+        for h in global_logger.handlers:
+            h.close()
+            global_logger.removeHandler(h)
 
     global_logger.info(
         f'Using {get_indeed_search_url(search_term, search_location, 100)} \nHeaders {headers}')

@@ -2,7 +2,7 @@ import requests as req
 import re
 import json
 import logging
-from sys import stderr
+from sys import stderr  
 from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
@@ -28,14 +28,14 @@ formatter = logging.Formatter(
     '%(asctime)s  %(levelname)s: %(message)s')
 
 
-def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
+def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0) -> str:
     parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}
     return INDEED_BASE_URL + urlencode(parameters)
 
 
 def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool = False,
-                       logfilename: str = f'{__name__}.log', **extra_headers: str):
+                       logfilename: str = f'{__name__}.log', **extra_headers: str) -> int | list[dict]:
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}

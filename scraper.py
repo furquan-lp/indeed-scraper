@@ -23,6 +23,7 @@ DEFAULT_HEADERS: Final = {
     'TE': 'trailers'
 }
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
+global_logger = logging.getLogger(__name__)
 
 
 def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
@@ -31,7 +32,8 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool | None = None, **extra_headers: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool | None = None,
+                       logfilename: str = 'scraper.log', **extra_headers: str):
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
@@ -39,9 +41,17 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
         location) is dict else str(location)
 
     if log:
-        logging.basicConfig(level=logging.INFO, filename='scraper.log',
-                            format='%(asctime)s  %(levelname)s: %(message)s')
-    logging.info(
+        global_logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            '%(asctime)s  %(levelname)s: %(message)s')
+        logfile_handler = logging.FileHandler(logfilename)
+        logfile_handler.setFormatter(formatter)
+        stdout_handler = logging.StreamHandler()
+        stdout_handler.setFormatter(formatter)
+        global_logger.addHandler(logfile_handler)
+        global_logger.addHandler(stdout_handler)
+
+    global_logger.info(
         f'Using {get_indeed_search_url(search_term, search_location, 100)} \nHeaders {headers}')
 
     try:
@@ -74,10 +84,10 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
                             'pubDate': job.get('pubDate'),
                         })
         else:
-            logging.error('Error: got response %d' % res.status_code)
+            global_logger.error('Error: got response %d' % res.status_code)
             return res.status_code
 
     except Exception as e:
-        logging.debug(f'An error occurred while fetching job IDs: {e}')
+        global_logger.debug(f'An error occurred while fetching job IDs: {e}')
         return 500
     return jobs

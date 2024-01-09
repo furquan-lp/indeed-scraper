@@ -67,9 +67,6 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **ext
                             'salaryType': job.get('extractedSalary').get('type') if job.get('extractedSalary') is not None else 'none',
                             'pubDate': job.get('pubDate'),
                         })
-
-                if len(jobs_list) < 10:
-                    print('err')
         else:
             print('Error: got response %d' % res.status_code)
             return res.status_code

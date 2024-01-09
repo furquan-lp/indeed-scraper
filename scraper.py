@@ -1,6 +1,7 @@
 import requests as req
 import re
 import json
+from sys import stderr
 from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
@@ -68,10 +69,10 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **ext
                             'pubDate': job.get('pubDate'),
                         })
         else:
-            print('Error: got response %d' % res.status_code)
+            print('Error: got response %d' % res.status_code, file=stderr)
             return res.status_code
 
     except Exception as e:
-        print('An error occurred while fetching job IDs:', e)
+        print('An error occurred while fetching job IDs:', e, file=stderr)
         return 500
     return jobs

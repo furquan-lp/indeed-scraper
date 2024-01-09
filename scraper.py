@@ -1,6 +1,7 @@
 import requests as req
 import re
 import json
+import logging
 from sys import stderr
 from urllib.parse import urlencode
 from pymongo import MongoClient
@@ -30,19 +31,23 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **extra_headers: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool | None = None, **extra_headers: str):
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
-    print('Using', get_indeed_search_url(search_term,
-          search_location, 100), '\nHeaders', headers)
+
+    if log:
+        logging.basicConfig(level=logging.INFO, filename='scraper.log',
+                            format='%(asctime)s  %(levelname)s: %(message)s')
+    logging.info(
+        f'Using {get_indeed_search_url(search_term, search_location, 100)} \nHeaders {headers}')
+
     try:
         indeed_jobs_url = get_indeed_search_url(
             search_term, search_location, 100)
         res = req.get(indeed_jobs_url, headers=headers)
-        print('response was', res)
         if res.status_code == 200:
             script_tag = re.findall(
                 r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});', res.text)
@@ -69,10 +74,10 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **ext
                             'pubDate': job.get('pubDate'),
                         })
         else:
-            print('Error: got response %d' % res.status_code, file=stderr)
+            logging.error('Error: got response %d' % res.status_code)
             return res.status_code
 
     except Exception as e:
-        print('An error occurred while fetching job IDs:', e, file=stderr)
+        logging.debug(f'An error occurred while fetching job IDs: {e}')
         return 500
     return jobs

@@ -2,7 +2,7 @@ import requests as req
 import re
 import json
 import logging
-from sys import stderr  
+from sys import stderr
 from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
@@ -28,19 +28,20 @@ formatter = logging.Formatter(
     '%(asctime)s  %(levelname)s: %(message)s')
 
 
-def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0) -> str:
+def get_indeed_url(keyword: str, location: str, radius: int, offset: int = 0) -> str:
     parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}
     return INDEED_BASE_URL + urlencode(parameters)
 
 
 def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool = False,
-                       logfilename: str = f'{__name__}.log', **extra_headers: str) -> int | list[dict]:
+                       logfilename: str = f'{__name__}.log', page: int = 1, **extra_headers: str) -> int | list[dict]:
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
+    offset = abs(10 * (page - 1))
 
     logfile_handler = logging.FileHandler(logfilename)
     logfile_handler.setFormatter(formatter)
@@ -58,11 +59,11 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
             global_logger.removeHandler(h)
 
     global_logger.info(
-        f'Using {get_indeed_search_url(search_term, search_location, 100)} \nHeaders {headers}')
+        f'Using {get_indeed_url(search_term, search_location, 100, offset)} \nHeaders {headers}')
 
     try:
-        indeed_jobs_url = get_indeed_search_url(
-            search_term, search_location, 100)
+        indeed_jobs_url = get_indeed_url(
+            search_term, search_location, 100, offset)
         res = req.get(indeed_jobs_url, headers=headers)
         if res.status_code == 200:
             script_tag = re.findall(
@@ -76,7 +77,7 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
                             'id': job.get('jobkey'),
                             'keyword': search_term,
                             'location': location,
-                            # 'page': round(offset / 10) + 1 if offset > 0 else 1,
+                            'page': page,
                             'position': index,
                             'company': job.get('company'),
                             'companyRating': job.get('companyRating'),

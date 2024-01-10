@@ -1,39 +1,27 @@
 import requests as req
 import re
 import json
+from sys import stderr
 from urllib.parse import urlencode
 from pymongo import MongoClient
 from typing import Final
 
+DEFAULT_USER_AGENT: Final[str] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 DEFAULT_HEADERS: Final = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-GB,en;q=0.5',
     'Accept-Encoding': 'gzip, deflate',
     'DNT': '1',
-    'Referer': 'https://in.indeed.com/',
+    'Referer': 'https://in.indeed.com/?from=jobsearch-empty-whatwhere',
     'Connection': 'keep-alive',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'same-origin',
     'Sec-Fetch-User': '?1',
-    'Sec-GPC': '1'
+    'Sec-GPC': '1',
+    'TE': 'trailers'
 }
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
-
-
-def get_current_ip():
-    res = req.get('https://api.ipify.org?format=json').json()
-    return res["ip"]
-
-
-def get_location_ip(ipaddr):
-    res = req.get(f'https://ipinfo.io/{ipaddr}/json').json()
-    return {'ip': ipaddr,
-            'city': res.get('city'),
-            'state': res.get('region'),
-            'country': res.get('country')
-            }
 
 
 def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
@@ -42,9 +30,10 @@ def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int 
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, header_cookie: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **extra_headers: str):
     jobs = []
-    headers = {**DEFAULT_HEADERS, 'Cookie': header_cookie}
+    headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
+               **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
     print('Using', get_indeed_search_url(search_term,
@@ -79,14 +68,11 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, heade
                             'salaryType': job.get('extractedSalary').get('type') if job.get('extractedSalary') is not None else 'none',
                             'pubDate': job.get('pubDate'),
                         })
-
-                if len(jobs_list) < 10:
-                    print('err')
         else:
-            print('Error: got response %d' % res.status_code)
+            print('Error: got response %d' % res.status_code, file=stderr)
             return res.status_code
 
     except Exception as e:
-        print('An error occurred while fetching job IDs:', e)
+        print('An error occurred while fetching job IDs:', e, file=stderr)
         return 500
     return jobs

@@ -1,6 +1,7 @@
 import requests as req
 import re
 import json
+import logging
 from sys import stderr
 from urllib.parse import urlencode
 from pymongo import MongoClient
@@ -22,31 +23,52 @@ DEFAULT_HEADERS: Final = {
     'TE': 'trailers'
 }
 INDEED_BASE_URL: Final[str] = 'https://in.indeed.com/jobs?'
+global_logger = logging.getLogger(__name__)
+formatter = logging.Formatter(
+    '%(asctime)s  %(levelname)s: %(message)s')
 
 
-def get_indeed_search_url(keyword: str, location: str, radius: int, offset: int = 0):
+def get_indeed_url(keyword: str, location: str, radius: int, offset: int = 0) -> str:
     parameters = {'q': keyword, 'l': '' if location == 'None' else location,
                   'filter': 0, 'start': offset, 'radius': radius}
     return INDEED_BASE_URL + urlencode(parameters)
 
 
-def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **extra_headers: str):
+def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: bool = False,
+                       logfilename: str = f'{__name__}.log', page: int = 1, **extra_headers: str) -> int | list[dict]:
     jobs = []
     headers = {'User-Agent': extra_headers.get('user_agent', DEFAULT_USER_AGENT),
                **DEFAULT_HEADERS, 'Cookie': extra_headers.get('cookie', '')}
     search_location: str = f"{location.get('city')}, {location.get('state')}" if type(
         location) is dict else str(location)
-    print('Using', get_indeed_search_url(search_term,
-          search_location, 100), '\nHeaders', headers)
+    offset = abs(10 * (page - 1))
+
+    logfile_handler = logging.FileHandler(logfilename)
+    logfile_handler.setFormatter(formatter)
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setFormatter(formatter)
+    if log:
+        global_logger.setLevel(logging.INFO)
+        if not global_logger.handlers:
+            global_logger.addHandler(logfile_handler)
+            global_logger.addHandler(stdout_handler)
+    else:
+        global_logger.setLevel(logging.ERROR)
+        for h in global_logger.handlers:
+            h.close()
+            global_logger.removeHandler(h)
+
+    global_logger.info(
+        f'Using {get_indeed_url(search_term, search_location, 100, offset)} \nHeaders {headers}')
+
     try:
-        indeed_jobs_url = get_indeed_search_url(
-            search_term, search_location, 100)
+        indeed_jobs_url = get_indeed_url(
+            search_term, search_location, 100, offset)
         res = req.get(indeed_jobs_url, headers=headers)
-        print('response was', res)
         if res.status_code == 200:
             script_tag = re.findall(
                 r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});', res.text)
-            if script_tag is not None:
+            if script_tag and script_tag is not None:
                 json_blob = json.loads(script_tag[0])
                 jobs_list = json_blob['metaData']['mosaicProviderJobCardsModel']['results']
                 for index, job in enumerate(jobs_list):
@@ -55,7 +77,7 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **ext
                             'id': job.get('jobkey'),
                             'keyword': search_term,
                             'location': location,
-                            # 'page': round(offset / 10) + 1 if offset > 0 else 1,
+                            # 'page': page,
                             'position': index,
                             'company': job.get('company'),
                             'companyRating': job.get('companyRating'),
@@ -68,11 +90,12 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, **ext
                             'salaryType': job.get('extractedSalary').get('type') if job.get('extractedSalary') is not None else 'none',
                             'pubDate': job.get('pubDate'),
                         })
+            else:
+                return 404
         else:
-            print('Error: got response %d' % res.status_code, file=stderr)
+            global_logger.error('Error: got response %d' % res.status_code)
             return res.status_code
-
     except Exception as e:
-        print('An error occurred while fetching job IDs:', e, file=stderr)
+        global_logger.error(f'An error occurred while fetching job IDs: {e}')
         return 500
     return jobs

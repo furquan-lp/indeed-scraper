@@ -77,7 +77,7 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
                             'id': job.get('jobkey'),
                             'keyword': search_term,
                             'location': location,
-                            'page': page,
+                            # 'page': page,
                             'position': index,
                             'company': job.get('company'),
                             'companyRating': job.get('companyRating'),

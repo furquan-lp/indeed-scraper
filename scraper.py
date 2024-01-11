@@ -68,7 +68,7 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
         if res.status_code == 200:
             script_tag = re.findall(
                 r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});', res.text)
-            if script_tag is not None:
+            if script_tag and script_tag is not None:
                 json_blob = json.loads(script_tag[0])
                 jobs_list = json_blob['metaData']['mosaicProviderJobCardsModel']['results']
                 for index, job in enumerate(jobs_list):
@@ -90,11 +90,12 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
                             'salaryType': job.get('extractedSalary').get('type') if job.get('extractedSalary') is not None else 'none',
                             'pubDate': job.get('pubDate'),
                         })
+            else:
+                return 404
         else:
             global_logger.error('Error: got response %d' % res.status_code)
             return res.status_code
-
     except Exception as e:
-        global_logger.debug(f'An error occurred while fetching job IDs: {e}')
+        global_logger.error(f'An error occurred while fetching job IDs: {e}')
         return 500
     return jobs

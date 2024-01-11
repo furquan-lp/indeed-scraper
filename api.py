@@ -67,14 +67,18 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
                                                               user_agent=scraper_header.indeed_user_agent)
         if scraper_result == previus_result:
             break
-        elif isinstance(scraper_result, int):
+
+        if isinstance(scraper_result, int):
             raise HTTPException(status_code=scraper_result,
                                 detail="Scraper Error")
         elif not scraper_result:
             raise HTTPException(status_code=404, detail="Jobs not found")
-        else:
-            previus_result = scraper_result
-            jobs_found += scraper_result
+
+        previus_result = scraper_result
+        jobs_found += scraper_result
+
+        if len(scraper_result) < 10:
+            break
 
     return {'jobs': jobs_found}
 

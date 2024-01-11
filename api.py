@@ -83,6 +83,23 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
     return {'jobs': jobs_found}
 
 
-@app.get('jobs/{page}/{keyword}')
-async def find_n_jobs(keyword: str, page: int):
-    pass
+@app.get('/jobs/{keyword}/{page}')
+async def find_n_jobs(keyword: str, page: int, request: Request, scraper_header: ScraperHeader,
+                      location: dict[str, str] | None = None):
+    client_ip: str | None = None if request.client is None else request.client.host
+    loc = location
+    if client_ip is not None and location is None:
+        ip_loc = get_ip_location(client_ip)
+        loc = {'city': ip_loc.get('city'), 'state': ip_loc.get('state')}
+
+    scraper_result: list[dict] | int = scrape_indeed_jobs(keyword, loc, scraper_header.logging, page=page,
+                                                          cookie=scraper_header.indeed_header_cookie,
+                                                          user_agent=scraper_header.indeed_user_agent)
+
+    if isinstance(scraper_result, int):
+        raise HTTPException(status_code=scraper_result,
+                            detail="Scraper Error")
+    elif not scraper_result:
+        raise HTTPException(status_code=404, detail="Jobs not found")
+    else:
+        return {'jobs': scraper_result}

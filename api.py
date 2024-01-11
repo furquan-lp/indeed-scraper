@@ -60,16 +60,20 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
         loc = {'city': ip_loc.get('city'), 'state': ip_loc.get('state')}
 
     jobs_found: list[dict] = []
+    previus_result: list[dict] = []
     for p in range(1, 100, 1):
         scraper_result: list[dict] | int = scrape_indeed_jobs(keyword, loc, scraper_header.logging, page=p,
                                                               cookie=scraper_header.indeed_header_cookie,
                                                               user_agent=scraper_header.indeed_user_agent)
-        if isinstance(scraper_result, int):
+        if scraper_result == previus_result:
+            break
+        elif isinstance(scraper_result, int):
             raise HTTPException(status_code=scraper_result,
                                 detail="Scraper Error")
         elif not scraper_result:
             raise HTTPException(status_code=404, detail="Jobs not found")
         else:
+            previus_result = scraper_result
             jobs_found += scraper_result
 
     return {'jobs': jobs_found}

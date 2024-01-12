@@ -41,9 +41,40 @@ keywords: list[str] = load_json_file(keywords_json)
 
 
 for keyword in keywords:
+    current_collection = db[keyword]
     for state, city in zip(states, cities):
         print(f'Searching "{keyword}" for {city}, {state}...')
 
+        jobs_found: list[dict] = []
+        previus_result: list[dict] = []
+        for p in range(1, 100, 1):
+            scraper_result = scrape_indeed_jobs(keyword, {'city': city, 'state': state}, False, page=p,
+                                                cookie=live_cookie, user_agent=user_agent)
+            if scraper_result == previus_result:
+                break
+
+            if isinstance(scraper_result, int):
+                print(
+                    f'Breaking at {city}, {state}. Scraper error.', file=stderr)
+                break
+            elif not scraper_result:
+                print(
+                    f'Breaking at {city}, {state}. No jobs found.', file=stderr)
+                break
+
+            previus_result = scraper_result
+            jobs_found += scraper_result
+
+            if len(scraper_result) < 10:
+                break
+
+        if jobs_found:
+            document = {
+                'city': city,
+                'state': state,
+                'jobs': jobs_found
+            }
+            current_collection.insert_one(document)
 
 """ collection_name = db['indeed_scrape']
 item_details = collection_name.find()

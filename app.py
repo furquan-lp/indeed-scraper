@@ -4,6 +4,7 @@ from sys import stderr
 from dotenv import load_dotenv
 from scraper import scrape_indeed_jobs
 from pymongo import MongoClient
+from pymongo.database import Database
 
 load_dotenv()
 live_cookie = os.environ['INDEED_SCRAPER_COOKIE']
@@ -19,6 +20,19 @@ def load_json_file(json_file: str):
     except FileNotFoundError:
         print(
             f'Error: File {os.path.realpath(__file__)}/{json_file} not found.', file=stderr)
+
+
+def count_db_jobs(db: Database, keywords: list[str]) -> int:
+    total: int = 0
+    for keyword in keywords:
+        collection = db[keyword]
+        item_details = collection.find()
+        for item in item_details:
+            num_jobs = len(item.get("jobs", ""))
+            print(
+                f'{num_jobs} \'{keyword}\' jobs in {item["city"]}, {item["state"]}')
+            total += num_jobs
+    return total
 
 
 client: MongoClient = MongoClient(
@@ -41,7 +55,7 @@ for keyword in keywords:
     current_collection = db[keyword]
     for state, city in zip(states, cities):
         if state in skip or city in skip:
-            print(f'Skipping state: {city}, {state}')
+            print(f'Skipping {city}, {state}')
             continue
 
         print(f'Searching "{keyword}" for {city}, {state}...')
@@ -76,10 +90,6 @@ for keyword in keywords:
         }
         current_collection.insert_one(document)
 
-
-collection_name = db[keyword]
-item_details = collection_name.find()
-for item in item_details:
-    print(f'{item["city"]}: {len(item.get("jobs", ""))} jobs')
+print(count_db_jobs(db, keywords))
 
 client.close()

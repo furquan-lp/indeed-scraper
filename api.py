@@ -36,7 +36,8 @@ async def root():
 
 @app.get('/jobs/{keyword}',
          summary='Scrape Indeed jobs for keyword',
-         description='Scrapes and returns (~10) jobs on the first page from Indeed for the given keyword.')
+         description='Scrapes and returns (~10) jobs on the first page from Indeed for the given keyword.',
+         response_description='An array of job objects containing keys such as location, maxSalary, minSalary, etc.')
 async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeader,
                     location: dict[str, str] | None = None):
     client_ip: str | None = None if request.client is None else request.client.host
@@ -60,7 +61,9 @@ async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeade
 @app.get('/jobs/all/{keyword}',
          summary='Scrape *all* Indeed jobs for keyword',
          description='''Crawls through available max_pages Indeed pages (or 100 pages if max_pages is not given) for
-         the given keyword, concatenates the jobs found and returns them.''')
+         the given keyword, concatenates the jobs found and returns them.''',
+         response_description='''A large array of concatenated job objects containing keys such as location, maxSalary,
+         minSalary, etc.''')
 async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperHeader,
                         location: dict[str, str] | None = None, max_pages: int = MAX_PAGE_COUNT):
     client_ip: str | None = None if request.client is None else request.client.host
@@ -97,7 +100,8 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
 
 @app.get('/jobs/{keyword}/{page}',
          summary='Scrape Indeed jobs on page for keyword',
-         description='Scrapes and returns (~10) jobs on the given page from Indeed for the given keyword.')
+         description='Scrapes and returns (~10) jobs on the given page from Indeed for the given keyword.',
+         response_description='An array of job objects containing keys such as location, maxSalary, minSalary, etc.')
 async def find_n_jobs(keyword: str, page: int, request: Request, scraper_header: ScraperHeader,
                       location: dict[str, str] | None = None):
     client_ip: str | None = None if request.client is None else request.client.host

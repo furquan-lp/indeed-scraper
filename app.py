@@ -45,6 +45,8 @@ for keyword in keywords:
         jobs_found: list[dict] = []
         previus_result: list[dict] = []
         for p in range(1, 100, 1):
+            if state == 'Punjab' or state == 'Haryana':
+                continue
             scraper_result = scrape_indeed_jobs(keyword, {'city': city, 'state': state}, False, page=p,
                                                 cookie=live_cookie, user_agent=user_agent)
             if scraper_result == previus_result:
@@ -71,7 +73,6 @@ for keyword in keywords:
             'jobs': jobs_found
         }
         current_collection.insert_one(document)
-
 
 collection_name = db['data scientist']
 item_details = collection_name.find()

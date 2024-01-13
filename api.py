@@ -2,6 +2,7 @@ import requests as req
 from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import BaseModel
 from scraper import scrape_indeed_jobs
+from typing import Final
 
 
 class ScraperHeader(BaseModel):
@@ -11,6 +12,8 @@ class ScraperHeader(BaseModel):
 
 
 app = FastAPI()
+
+MAX_PAGE_COUNT: Final[int] = 100
 
 
 def get_server_ip() -> str:
@@ -54,7 +57,7 @@ async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeade
 
 @app.get('/jobs/all/{keyword}')
 async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperHeader,
-                        location: dict[str, str] | None = None):
+                        location: dict[str, str] | None = None, max_pages: int = MAX_PAGE_COUNT):
     client_ip: str | None = None if request.client is None else request.client.host
     loc = location
     if client_ip is not None and location is None:
@@ -64,7 +67,7 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
 
     jobs_found: list[dict] = []
     previus_result: list[dict] = []
-    for p in range(1, 100, 1):
+    for p in range(1, max_pages, 1):
         scraper_result: list[dict] | int = scrape_indeed_jobs(keyword, loc, scraper_header.logging, page=p,
                                                               cookie=scraper_header.indeed_header_cookie,
                                                               user_agent=scraper_header.indeed_user_agent)

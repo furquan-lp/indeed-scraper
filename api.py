@@ -1,5 +1,6 @@
 import requests as req
 from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from scraper import scrape_indeed_jobs
 from typing import Final
@@ -11,7 +12,13 @@ class ScraperHeader(BaseModel):
     logging: bool = False
 
 
-app = FastAPI()
+class NotFoundMessage(BaseModel):
+    detail: str = 'Jobs not found'
+
+
+app = FastAPI(title='indeed_scraper',
+              summary='A fast, exhaustive scraper for Indeed.com',
+              version='0.7.0')
 
 MAX_PAGE_COUNT: Final[int] = 100
 
@@ -30,11 +37,28 @@ def get_ip_location(ipaddr: str) -> dict[str, str]:
 
 
 @app.get('/')
-async def root():
-    return {'res': '200 OK'}
+async def root() -> HTMLResponse:
+    index_html: str = ''
+    try:
+        with open('index.html', encoding='utf-8') as f:
+            index_html = f.read()
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return HTMLResponse(content=index_html)
 
 
-@app.get('/jobs/{keyword}')
+@app.get('/jobs/{keyword}',
+         summary='Scrape Indeed jobs for keyword',
+         description='Scrapes and returns (~10) jobs on the first page from Indeed for the given keyword.',
+         response_description='An array of job objects containing keys such as location, maxSalary, minSalary, etc.',
+         responses={
+             403: {'description': '''Indeed did not allow the scraper to crawl. Possible causes may include user agent
+              mismatch and stale cookies.'''},
+             404: {'description': 'No jobs were found for the requested keyword and the given location.',
+                   'model': NotFoundMessage},
+             500: {}
+         })
 async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeader,
                     location: dict[str, str] | None = None):
     client_ip: str | None = None if request.client is None else request.client.host
@@ -55,7 +79,19 @@ async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeade
         return {'jobs': scraper_result}
 
 
-@app.get('/jobs/all/{keyword}')
+@app.get('/jobs/all/{keyword}',
+         summary='Scrape *all* Indeed jobs for keyword',
+         description='''Crawls through available max_pages Indeed pages (or 100 pages if max_pages is not given) for
+         the given keyword, concatenates the jobs found and returns them.''',
+         response_description='''A large array of concatenated job objects containing keys such as location, maxSalary,
+         minSalary, etc.''',
+         responses={
+             403: {'description': '''Indeed did not allow the scraper to crawl. Possible causes may include user agent
+              mismatch and stale cookies.'''},
+             404: {'description': 'No jobs were found for the requested keyword and the given location.',
+                   'model': NotFoundMessage},
+             500: {}
+         })
 async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperHeader,
                         location: dict[str, str] | None = None, max_pages: int = MAX_PAGE_COUNT):
     client_ip: str | None = None if request.client is None else request.client.host
@@ -90,7 +126,17 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
     return {'jobs': jobs_found}
 
 
-@app.get('/jobs/{keyword}/{page}')
+@app.get('/jobs/{keyword}/{page}',
+         summary='Scrape Indeed jobs on page for keyword',
+         description='Scrapes and returns (~10) jobs on the given page from Indeed for the given keyword.',
+         response_description='An array of job objects containing keys such as location, maxSalary, minSalary, etc.',
+         responses={
+             403: {'description': '''Indeed did not allow the scraper to crawl. Possible causes may include user agent
+              mismatch and stale cookies.'''},
+             404: {'description': 'No jobs were found for the requested keyword and the given location.',
+                   'model': NotFoundMessage},
+             500: {}
+         })
 async def find_n_jobs(keyword: str, page: int, request: Request, scraper_header: ScraperHeader,
                       location: dict[str, str] | None = None):
     client_ip: str | None = None if request.client is None else request.client.host

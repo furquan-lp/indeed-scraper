@@ -1,6 +1,12 @@
 # indeed-scraper
 Python project to scrape Indeed data and catalog it on a fully editable web dashboard
 
+## API Instructions
+
+The API is available at: https://scraper.nextdev.in/
+
+API documentation can be found at: https://scraper.nextdev.in/docs
+
 ## Scraper Instructions
 
 * The `scrape_indeed_jobs` function scrapes Indeed.com for the given search term and location using the given client
@@ -33,3 +39,31 @@ curl 'https://in.indeed.com/?from=jobsearch-empty-whatwhere' --compressed -H 'Us
 * The user agent string must match the session the above live cookie was obtained from
 * To find it follow the above instructions exactly
 * Then copy the value for `User-Agent` and pass it as the `user_agent`
+
+## Extra: Understanding the Cookie
+
+_Disclaimer: Cookie fabrication won't be possible so this section is for educational purposes only. I do not condone
+or promote any malicious use of this information._
+
+* When you copy the cookie string you will see something like the following:
+```
+CTK = "XXXX"
+__cf_bm = "XXXXX"
+_cfuvid = "XXXXX"
+CSRF = "XXXXX"
+gonetap = "0"
+SHARED_INDEED_CSRF_TOKEN = "XXXXX"
+LC = "co=IN"
+indeed_rcc = "LV"
+INDEED_CSRF_TOKEN = "XXXXX"
+LV = "LA=1703877527:CV=1703877527:TS=1703877527"
+hpnode = "1"
+```
+* These are the cookies Indeed saves on your browser when you visit the link https://in.indeed.com/jobs. I'll go over the most important cookies that you _need_ for the scraper to function:
+  * `CTK` appears to be a unique hash for the user session, pretty self explanatory
+  * `CSRF` and/or `SHARED_INDEED_CSRF_TOKEN` are both used to prevent cross site forgery, you can find more information [here](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token).
+  * `__cf_bm` is the Cloudflare bot management cookie to help identify automated traffic (like what we're doing). This is possibly the primary reason for the scraper session expiring so quickly.
+  * `_cfuvid` is the Cloudlfare unique visitor id used to rate limit sessions from the same IP address if they don't provide this token. I wouldn't recommend crawling Indeed without this.
+  * `LV = "LA=xyz:CV=xyz:TS=xyz"` These appear to be Unix timestamps that match the time the cookie was created, they're probably used (with other tokens) to determine the lifetime of the session. As of January 2024, the session seems to have a pretty short lifespan and it might be extended by manipulating these but you don't need these for the scraper to function.
+  * `LC` is a location code. Easy to understand.
+  * `hpnode` and `gonetap` appear to be some Indeed-specific preference cookies, they're not important and aren't necessary for the scraper to function as of 2024-01-13

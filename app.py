@@ -32,13 +32,10 @@ except Exception as e:
     print(e)
 
 db = client.indeed_scrape
-
-
 locations: dict[str, list[str]] = load_json_file(location_json)
 states: list[str] = locations.get('states', [])
 cities: list[str] = locations.get('capitalCities', [])
 keywords: list[str] = load_json_file(keywords_json)
-
 
 for keyword in keywords:
     current_collection = db[keyword]
@@ -55,11 +52,11 @@ for keyword in keywords:
 
             if isinstance(scraper_result, int):
                 print(
-                    f'Breaking at {city}, {state}. Scraper error.', file=stderr)
+                    f'Breaking at {city}, {state}. Scraper error: {scraper_result}.', file=stderr)
                 break
             elif not scraper_result:
                 print(
-                    f'Breaking at {city}, {state}. No jobs found.', file=stderr)
+                    f'Breaking at {city}, {state}. No jobs found: {scraper_result}.', file=stderr)
                 break
 
             previus_result = scraper_result
@@ -68,17 +65,17 @@ for keyword in keywords:
             if len(scraper_result) < 10:
                 break
 
-        if jobs_found:
-            document = {
-                'city': city,
-                'state': state,
-                'jobs': jobs_found
-            }
-            current_collection.insert_one(document)
+        document = {
+            'city': city,
+            'state': state,
+            'jobs': jobs_found
+        }
+        current_collection.insert_one(document)
 
-""" collection_name = db['indeed_scrape']
+
+collection_name = db['data scientist']
 item_details = collection_name.find()
 for item in item_details:
-    print(item) """
+    print(f'{item["city"]}: {len(item.get("jobs", ""))} jobs')
 
 client.close()

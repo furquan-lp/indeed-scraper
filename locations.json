@@ -28,7 +28,8 @@
         "Uttar Pradesh",
         "Uttarakhand",
         "West Bengal",
-        "Delhi"
+        "Delhi",
+        "Chandigarh"
     ],
     "capitalCities": [
         "Amaravati",
@@ -59,6 +60,7 @@
         "Lucknow",
         "Dehradun",
         "Kolkata",
-        "New Delhi"
+        "New Delhi",
+        "Chandigarh"
     ]
 }

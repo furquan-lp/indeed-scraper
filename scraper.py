@@ -4,7 +4,6 @@ import json
 import logging
 from sys import stderr
 from urllib.parse import urlencode
-from pymongo import MongoClient
 from typing import Final
 
 DEFAULT_USER_AGENT: Final[str] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'

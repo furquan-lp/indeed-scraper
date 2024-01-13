@@ -1,6 +1,12 @@
 # indeed-scraper
 Python project to scrape Indeed data and catalog it on a fully editable web dashboard
 
+## API Instructions
+
+The API is available at: https://scraper.nextdev.in/
+
+API documentation can be found at: https://scraper.nextdev.in/docs
+
 ## Scraper Instructions
 
 * The `scrape_indeed_jobs` function scrapes Indeed.com for the given search term and location using the given client
@@ -34,7 +40,7 @@ curl 'https://in.indeed.com/?from=jobsearch-empty-whatwhere' --compressed -H 'Us
 * To find it follow the above instructions exactly
 * Then copy the value for `User-Agent` and pass it as the `user_agent`
 
-### Extra: Understanding the Cookie
+## Extra: Understanding the Cookie
 
 _Disclaimer: Cookie fabrication won't be possible so this section is for educational purposes only. I do not condone
 or promote any malicious use of this information._

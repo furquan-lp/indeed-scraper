@@ -1,5 +1,5 @@
 import requests as req
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import BaseModel
 from scraper import scrape_indeed_jobs
 
@@ -45,7 +45,7 @@ async def find_jobs(keyword: str, request: Request, scraper_header: ScraperHeade
     if type(scraper_result) is int:
         raise HTTPException(status_code=scraper_result, detail="Scraper Error")
     elif not scraper_result:
-        raise HTTPException(status_code=404, detail="Jobs not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jobs not found")
     else:
         return {'jobs': scraper_result}
 
@@ -72,7 +72,7 @@ async def find_all_jobs(keyword: str, request: Request, scraper_header: ScraperH
             raise HTTPException(status_code=scraper_result,
                                 detail="Scraper Error")
         elif not scraper_result:
-            raise HTTPException(status_code=404, detail="Jobs not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jobs not found")
 
         previus_result = scraper_result
         jobs_found += scraper_result
@@ -100,6 +100,6 @@ async def find_n_jobs(keyword: str, page: int, request: Request, scraper_header:
         raise HTTPException(status_code=scraper_result,
                             detail="Scraper Error")
     elif not scraper_result:
-        raise HTTPException(status_code=404, detail="Jobs not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jobs not found")
     else:
         return {'jobs': scraper_result}

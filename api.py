@@ -1,5 +1,6 @@
 import requests as req
 from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from scraper import scrape_indeed_jobs
 from typing import Final
@@ -36,8 +37,15 @@ def get_ip_location(ipaddr: str) -> dict[str, str]:
 
 
 @app.get('/')
-async def root():
-    return {'res': '200 OK'}
+async def root() -> HTMLResponse:
+    index_html: str = ''
+    try:
+        with open('index.html', encoding='utf-8') as f:
+            index_html = f.read()
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return HTMLResponse(content=index_html)
 
 
 @app.get('/jobs/{keyword}',

@@ -35,7 +35,7 @@ locations: dict[str, list[str]] = load_json_file(location_json)
 states: list[str] = locations.get('states', [])
 cities: list[str] = locations.get('capitalCities', [])
 keywords: list[str] = load_json_file(keywords_json)
-skip: list[str] = ['Punjab', 'Haryana']
+skip: list[str] = load_json_file('skip.json')
 
 for keyword in keywords:
     current_collection = db[keyword]

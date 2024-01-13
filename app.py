@@ -56,11 +56,11 @@ for keyword in keywords:
 
             if isinstance(scraper_result, int):
                 print(
-                    f'Breaking at {city}, {state}. Scraper error: {scraper_result}.', file=stderr)
+                    f'Breaking at page {p} for {city}, {state}. Scraper error: {scraper_result}.', file=stderr)
                 break
             elif not scraper_result:
                 print(
-                    f'Breaking at {city}, {state}. No jobs found: {scraper_result}.', file=stderr)
+                    f'Breaking at page {p} for {city}, {state}. No jobs found: {scraper_result}.', file=stderr)
                 break
 
             previus_result = scraper_result
@@ -75,6 +75,7 @@ for keyword in keywords:
             'jobs': jobs_found
         }
         current_collection.insert_one(document)
+
 
 collection_name = db[keyword]
 item_details = collection_name.find()

@@ -40,13 +40,15 @@ keywords: list[str] = load_json_file(keywords_json)
 for keyword in keywords:
     current_collection = db[keyword]
     for state, city in zip(states, cities):
+        if state == 'Punjab' or state == 'Haryana':
+            print(f'Skipping state: {state}')
+            continue
+
         print(f'Searching "{keyword}" for {city}, {state}...')
 
         jobs_found: list[dict] = []
         previus_result: list[dict] = []
         for p in range(1, 100, 1):
-            if state == 'Punjab' or state == 'Haryana':
-                continue
             scraper_result = scrape_indeed_jobs(keyword, {'city': city, 'state': state}, False, page=p,
                                                 cookie=live_cookie, user_agent=user_agent)
             if scraper_result == previus_result:

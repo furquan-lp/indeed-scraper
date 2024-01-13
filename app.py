@@ -1,6 +1,5 @@
 import os
 import json
-import pymongo
 from sys import stderr
 from dotenv import load_dotenv
 from scraper import scrape_indeed_jobs
@@ -36,12 +35,13 @@ locations: dict[str, list[str]] = load_json_file(location_json)
 states: list[str] = locations.get('states', [])
 cities: list[str] = locations.get('capitalCities', [])
 keywords: list[str] = load_json_file(keywords_json)
+skip: list[str] = ['Punjab', 'Haryana']
 
 for keyword in keywords:
     current_collection = db[keyword]
     for state, city in zip(states, cities):
-        if state == 'Punjab' or state == 'Haryana':
-            print(f'Skipping state: {state}')
+        if state in skip or city in skip:
+            print(f'Skipping state: {city}, {state}')
             continue
 
         print(f'Searching "{keyword}" for {city}, {state}...')
@@ -76,7 +76,7 @@ for keyword in keywords:
         }
         current_collection.insert_one(document)
 
-collection_name = db['data scientist']
+collection_name = db[keyword]
 item_details = collection_name.find()
 for item in item_details:
     print(f'{item["city"]}: {len(item.get("jobs", ""))} jobs')

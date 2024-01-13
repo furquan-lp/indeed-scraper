@@ -27,9 +27,9 @@ client: MongoClient = MongoClient(
 
 try:
     client.admin.command('ping')
-    print("Pinged database. Successfully connected to MongoDB.")
+    print('Pinged database. Successfully connected to MongoDB.')
 except Exception as e:
-    print(e)
+    print(f'Couldn\'t connect to the database: {e}', file=stderr)
 
 db = client.indeed_scrape
 locations: dict[str, list[str]] = load_json_file(location_json)

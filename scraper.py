@@ -4,8 +4,8 @@ import json
 import logging
 from sys import stderr
 from urllib.parse import urlencode
-from pymongo import MongoClient
 from typing import Final
+from http import HTTPStatus
 
 DEFAULT_USER_AGENT: Final[str] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 DEFAULT_HEADERS: Final = {
@@ -65,7 +65,7 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
         indeed_jobs_url = get_indeed_url(
             search_term, search_location, 100, offset)
         res = req.get(indeed_jobs_url, headers=headers)
-        if res.status_code == 200:
+        if res.status_code == HTTPStatus.OK:
             script_tag = re.findall(
                 r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});', res.text)
             if script_tag and script_tag is not None:
@@ -91,11 +91,11 @@ def scrape_indeed_jobs(search_term, location: dict[str, str] | str | None, log: 
                             'pubDate': job.get('pubDate'),
                         })
             else:
-                return 404
+                return HTTPStatus.NOT_FOUND
         else:
             global_logger.error('Error: got response %d' % res.status_code)
             return res.status_code
     except Exception as e:
         global_logger.error(f'An error occurred while fetching job IDs: {e}')
-        return 500
+        return HTTPStatus.INTERNAL_SERVER_ERROR
     return jobs

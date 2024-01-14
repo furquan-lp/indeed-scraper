@@ -1,2 +1,4 @@
 *env
 *.pem
+__pycache__
+*mypy*

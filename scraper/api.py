@@ -2,7 +2,7 @@ import requests as req
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from scraper import scrape_indeed_jobs
+from scraper.scraper import scrape_indeed_jobs
 from typing import Final
 
 

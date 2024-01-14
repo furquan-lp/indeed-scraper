@@ -18,7 +18,7 @@ class NotFoundMessage(BaseModel):
 
 app = FastAPI(title='indeed_scraper',
               summary='A fast, exhaustive scraper for Indeed.com',
-              version='0.7.0')
+              version='0.7.8')
 
 MAX_PAGE_COUNT: Final[int] = 100
 

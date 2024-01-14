@@ -27,6 +27,22 @@
         a:hover {
             text-decoration: underline;
         }
+
+        body {
+            border-color: red;
+            border: 1em;
+            min-height: 95vh;
+        }
+
+        footer {
+            position: sticky;
+            top: 95vh;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
@@ -36,6 +52,11 @@
     <h2>The source code as well as usage instructions can be found:
         <a href="https://github.com/furquan-lp/indeed-scraper">here</a>
     </h2>
+    <footer>
+        <hr />
+        <span class="footer-container"><span>Copyright &copy; 2024 Syed Furquan Ahmad. Contact:
+                syed@nextdev.in</span><b>Built on FastAPI | Powered by Fly.io</b></span>
+    </footer>
 </body>
 
 </html>

@@ -2,6 +2,7 @@ import requests as req
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from fastapi_cors import CORS
 from scraper.scraper import scrape_indeed_jobs
 from typing import Final
 
@@ -19,6 +20,15 @@ class NotFoundMessage(BaseModel):
 app = FastAPI(title='indeed_scraper',
               summary='A fast, exhaustive scraper for Indeed.com',
               version='0.7.8')
+origins = ["*"]
+
+app.add_middleware(
+    CORS,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 MAX_PAGE_COUNT: Final[int] = 100
 

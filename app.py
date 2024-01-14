@@ -2,7 +2,7 @@ import os
 import json
 from sys import stderr
 from dotenv import load_dotenv
-from scraper import scrape_indeed_jobs
+from scraper.scraper import scrape_indeed_jobs
 from pymongo import MongoClient
 from pymongo.database import Database
 

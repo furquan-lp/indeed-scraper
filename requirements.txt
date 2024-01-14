@@ -3,10 +3,14 @@ anyio==4.2.0
 certifi==2023.11.17
 charset-normalizer==3.3.2
 click==8.1.7
+environs==10.3.0
 fastapi==0.109.0
+fastapi_cors==0.0.6
 h11==0.14.0
 httptools==0.6.1
 idna==3.6
+marshmallow==3.20.2
+packaging==23.2
 pycodestyle==2.11.1
 pydantic==2.5.3
 pydantic_core==2.14.6

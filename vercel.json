@@ -1,8 +1,18 @@
 {
-    "rewrites": [
+    "version": "0.7.8",
+    "builds": [
         {
-            "source": "/(.*)",
-            "destination": "/main"
+            "src": "main.py",
+            "use": "@vercel/python"
         }
-    ]
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/main.py"
+        }
+    ],
+    "env": {
+        "APP_MODULE": "scraper.api:app"
+    }
 }

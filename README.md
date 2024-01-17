@@ -67,3 +67,12 @@ hpnode = "1"
   * `LV = "LA=xyz:CV=xyz:TS=xyz"` These appear to be Unix timestamps that match the time the cookie was created, they're probably used (with other tokens) to determine the lifetime of the session. As of January 2024, the session seems to have a pretty short lifespan and it might be extended by manipulating these but you don't need these for the scraper to function.
   * `LC` is a location code. Easy to understand.
   * `hpnode` and `gonetap` appear to be some Indeed-specific preference cookies, they're not important and aren't necessary for the scraper to function as of 2024-01-13
+
+## Legal
+
+indeed_scraper is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+indeed_scraper is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [the license](LICENSE) for more details.

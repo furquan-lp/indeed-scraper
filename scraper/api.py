@@ -33,7 +33,7 @@ class NotFoundMessage(BaseModel):
 
 app = FastAPI(title='indeed_scraper',
               summary='A fast, exhaustive scraper for Indeed.com',
-              version='0.8.0')
+              version='0.8.1')
 origins = ["*"]
 
 app.add_middleware(
